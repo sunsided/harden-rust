@@ -92,7 +92,8 @@ Collect facts and print them as a gap table (area, current state, target, action
 - `python3 <skill>/scripts/trusted-publishing.py`: which crate names are free, published, or
   **taken by another repository**.
 - Config: `[lints]` / `[workspace.lints]`, `clippy.toml`, `rustfmt.toml`, `deny.toml`,
-  `_typos.toml`, `REUSE.toml`, `LICENSES/`, `.gitignore`. Check that `Cargo.lock` is tracked.
+  `_typos.toml`, `REUSE.toml`, `LICENSES/`, root
+  `LICENSE-*` copies, `.gitignore`. Check that `Cargo.lock` is tracked.
 - Automation:
   - `.github/workflows/*`, `.github/dependabot.yml`, `.github/instructions/`;
   - `release-plz.toml` / `release.toml`;

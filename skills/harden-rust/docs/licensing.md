@@ -25,6 +25,11 @@ license expression per crate.
   `uvx reuse download --all` after writing `REUSE.toml`. Never type license texts from memory.
   If `uvx` is unavailable or not allowed, download the texts from SPDX:
   `curl -fsSo LICENSES/<ID>.txt https://raw.githubusercontent.com/spdx/license-list-data/main/text/<ID>.txt`.
+- `LICENSE-<SPDX-ID>` in the repo root for every project license (not for CC0 examples):
+  a plain copy of `LICENSES/<SPDX-ID>.txt`, for example `cp LICENSES/MPL-2.0.txt LICENSE-MPL-2.0`.
+  GitHub detects licenses only from root `LICENSE*` files, so without them the repo shows no
+  license. Use copies, not symlinks: GitHub does not follow symlinks for detection. `reuse lint`
+  ignores `LICENSE*` files, so the copies need no `REUSE.toml` entry.
 - `REUSE.toml` (from `templates/REUSE.toml.template`; the suffix keeps reuse from reading the template as config): it maps paths to licenses. `__AUTHOR__` comes from `authors` in
   `Cargo.toml`, the git history's main author (`git shortlog -sne HEAD | head -1`), or "The
   <project> contributors". Skip placeholder identities, such as one-letter names or emails

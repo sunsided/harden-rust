@@ -18,7 +18,8 @@ flowchart LR
 ```
 
 1. On every push to the main branch, `release-plz release-pr` opens or updates a PR on a
-   `release/...` branch (`pr_branch_prefix`).
+   `release/...` branch (`pr_branch_prefix`), titled "Release v1.2.3" instead of release-plz's
+   default "chore: release v1.2.3" (`pr_name`).
    - The PR bumps each changed crate's version and updates its `CHANGELOG.md`.
    - The bump comes from imperative commit verbs (`custom_minor_increment_regex`), and
      cargo-semver-checks escalates it to major when the API breaks.
@@ -157,6 +158,6 @@ If a human should cut releases, for example with cargo-release, use the **GitVer
 committed versions. The version then always comes from GitVersion. release-plz is for
 bot-driven releases only.
 
-Sources: https://release-plz.dev/docs/config (git_only, publish, pr_branch_prefix,
+Sources: https://release-plz.dev/docs/config (git_only, publish, pr_branch_prefix, pr_name,
 custom_*_increment_regex, commit_parsers), https://release-plz.dev/docs/github/quickstart,
 https://release-plz.dev/docs/github/token, https://release-plz.dev/docs/usage/release-pr

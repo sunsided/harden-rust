@@ -12,6 +12,9 @@ git_release_enable = true
 git_release_type = "auto"
 # Release PR branches follow the branching model (release/*), not the default `release-plz-`.
 pr_branch_prefix = "release/"
+# Release PR title is imperative too; the default is "chore: release ...". package/version are
+# set only for a single package or one shared version, hence the guards.
+pr_name = "Release{% if package %} {{ package }}{% endif %}{% if version %} v{{ version }}{% endif %}"
 # Commits are imperative ("Add X", "Fix Y"), not Conventional Commits: map verbs to bumps.
 custom_minor_increment_regex = "^(Add|Introduce|Support|Allow|Implement|Expose)\\b"
 custom_major_increment_regex = "(?m)^BREAKING CHANGE:|^Break\\b"

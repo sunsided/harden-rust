@@ -107,6 +107,15 @@ House style for every line of Rust that is written or reviewed:
 
 ## Installation
 
+With the [skills CLI](https://skills.sh) (Claude Code and other agents):
+
+```bash
+npx skills add sunsided/harden-rust --skill '*' -g     # both skills, user-wide
+npx skills add sunsided/harden-rust --skill rust-style  # one skill, current project only
+```
+
+Or from a clone, symlinked so `git pull` updates them:
+
 ```bash
 ln -s "$(pwd)/skills/harden-rust" ~/.claude/skills/harden-rust
 ln -s "$(pwd)/skills/rust-style" ~/.claude/skills/rust-style

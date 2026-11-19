@@ -1,0 +1,12 @@
+# GitVersion 7 (v7 configuration format). Git Flow: develop -> X.Y.Z-alpha.N,
+# release/* and hotfix/* -> X.Y.Z-beta.N, main at a vX.Y.Z tag -> X.Y.Z. docs/versioning.md
+calculation:
+  branches:
+    develop:
+      mode: ContinuousDelivery
+    release:
+      mode: ContinuousDelivery
+    hotfix:
+      mode: ContinuousDelivery
+output: {}
+workflow: GitFlow/v1

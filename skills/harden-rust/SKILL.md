@@ -63,6 +63,7 @@ below means this skill's directory.
 | 2 | Commit style when history uses another convention (e.g. Conventional Commits) and CONTRIBUTING.md is silent | `github.md` |
 | 2 | Non-conforming branches: rename locally (remote renames are outward-facing) or leave | `github.md` |
 | 2 | License scheme; CC0 examples (only if `examples/` exists) | `licensing.md` |
+| 2 | Versioning mode: release-plz (libraries, per-crate) or GitVersion (apps, Git Flow, shared version, alpha/beta/stable) | `versioning.md` |
 | 2 | Which crates publish; renaming names taken on crates.io | `release.md` |
 | 2 | Per-crate versions when `version.workspace = true` | `release.md` |
 | 2 | MSRV when `rust-version` is missing (recommend the lowest that works; a signal, raisable) | `supply-chain.md` |
@@ -97,6 +98,9 @@ Collect facts and print them as a gap table (area, current state, target, action
   - `release-plz.toml` / `release.toml`;
   - `Taskfile*` and its includes;
   - `.pre-commit-config.yaml`, `fuzz/`, `benches/`, proptest, `Dockerfile`.
+- Versioning: `GitVersion.yml` (`workflow:` at the top level means the v6 format, kept pinned
+  to 6.x; `calculation:` means v7), `release-plz.toml`, `release.toml`, and how CI stamps
+  versions (`cargo set-version`).
 - Conventions: CONTRIBUTING.md, REVIEW.md, `docs/review/`, CLAUDE.md / AGENTS.md. For the
   branches, run `git branch -a`: a `develop` branch means Git Flow, and non-conforming
   branches get flagged. For the commit style, run `git log --format=%s -20`.
@@ -154,8 +158,14 @@ In this order. Commit after each step with an imperative message. Do not push.
    `.pre-commit-config.yaml`, `copilot-instructions.md`, `review/*.md`, `REVIEW.md`.
 10. **CONTRIBUTING.md** (template): merge it into an existing file, and keep only the
     branching model that applies.
-11. **Release**: `docs/release.md`. `release-plz.toml`, `release-plz.yml`,
-    `publish-crates-io.yml`, and `release-binaries.yml` for binaries (`docs/binaries.md`).
+11. **Release**: `docs/versioning.md` picks the mode.
+    - **release-plz mode** (`docs/release.md`): `release-plz.toml`, `release-plz.yml`,
+      `publish-crates-io.yml`.
+    - **GitVersion mode** (human-driven releases): `GitVersion.yml`
+      (`templates/gitversion/`), `scripts/zero-version.sh` and `scripts/ci-version.sh`, the
+      `version` / `release:tag` / `release:cargo` tasks, the optional `release.toml`, and
+      `publish-crates-io.gitversion.yml` applied as `publish-crates-io.yml`.
+    - Both modes: `release-binaries.yml` for binaries (`docs/binaries.md`).
 12. **GitHub settings** (after confirmation): `docs/github.md`. Repo settings, the ruleset
     (`templates/github/ruleset-default-branch.json`), and the environments.
 
@@ -202,6 +212,7 @@ uvx reuse lint
 cargo package --list -p <crate>                   # LICENSES/, README, docs/mermaid.html included
 release-plz release --dry-run                     # and `release-plz update` on a throwaway branch
 python3 <skill>/scripts/trusted-publishing.py     # read-only
+task version                                      # GitVersion mode: shows the computed version
 git grep -nE '__[A-Z][A-Z_]*__'                   # no placeholders left
 ```
 
@@ -230,5 +241,7 @@ steps after confirmation.
 8. **Trusted publishing**: per crate, workflow `publish-crates-io.yml`, environment
    `crates-io`. Use `trusted-publishing.py --apply`, or the web UI.
 9. **semver job**: enable it once every library crate has a first release.
-10. **Local**: `prek install`. Install the missing tools named in Phase 5.
+10. **Local**: `prek install`. Install the missing tools named in Phase 5. In GitVersion
+    mode, also install `dotnet tool install -g GitVersion.Tool` (and set `DO_NOT_TRACK=1`
+    to opt out of its telemetry).
 11. **Push** the branch, and open a PR with an imperative title. Its CI run is the final check.

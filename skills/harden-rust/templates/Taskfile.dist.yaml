@@ -199,6 +199,56 @@ tasks:
       # --bench '*': only [[bench]] targets (--benches would include lib harnesses that reject criterion flags).
       - cargo bench --workspace --bench '*' -- {{.CLI_ARGS}}
 
+  # GitVersion mode only (docs/versioning.md); remove version/release:* in release-plz repos.
+  version:
+    desc: Print the version GitVersion computes for the current commit
+    env:
+      DO_NOT_TRACK: '1'
+    preconditions:
+      - &gitversion
+        sh: command -v dotnet-gitversion
+        msg: "GitVersion not found - dotnet tool install -g GitVersion.Tool"
+    cmds:
+      - dotnet-gitversion --show-variable SemVer
+
+  release:tag:
+    desc: "Tag a stable release vX.Y.Z from GitVersion (PRE=1: tag the pre-release, e.g. vX.Y.Z-beta.N)"
+    env:
+      DO_NOT_TRACK: '1'
+    preconditions:
+      - *gitversion
+      - sh: git diff --quiet && git diff --cached --quiet
+        msg: "Working tree is not clean"
+      - sh: '[ "$(git rev-parse --abbrev-ref HEAD)" = main ] || git rev-parse --abbrev-ref HEAD | grep -qE "^(release|hotfix)/"'
+        msg: "Tag from main or a release/hotfix branch"
+    vars:
+      VERSION:
+        sh: DO_NOT_TRACK=1 dotnet-gitversion --show-variable {{if .PRE}}SemVer{{else}}MajorMinorPatch{{end}}
+    prompt: "Create and push tag v{{.VERSION}}? This triggers the publish and release workflows."
+    cmds:
+      - git tag -a "v{{.VERSION}}" -m "Release {{.VERSION}}"
+      - git push origin "v{{.VERSION}}"
+
+  release:cargo:
+    desc: Commit the GitVersion version with cargo-release on a release/hotfix branch (optional)
+    preconditions:
+      - *gitversion
+      - sh: cargo release --version
+        msg: "cargo-release not found - cargo install --locked cargo-release"
+      - sh: cargo set-version --version
+        msg: "cargo-edit not found - cargo install --locked cargo-edit"
+    vars:
+      VERSION:
+        sh: DO_NOT_TRACK=1 dotnet-gitversion --show-variable MajorMinorPatch
+    prompt: "Commit version {{.VERSION}} with cargo-release?"
+    cmds:
+      # Both cargo-release and cargo set-version refuse to "downgrade" from the committed
+      # X.Y.Z-alpha placeholder, and `cargo release version` rejects a dirty tree, so zero the
+      # version, stamp it with cargo set-version, then let cargo-release commit it.
+      - sh scripts/zero-version.sh
+      - cargo set-version "{{.VERSION}}"
+      - cargo release commit --execute --no-confirm
+
   # Remove dist/dist:sbom for library-only repos (docs/binaries.md).
   dist:
     desc: Build the release binary with cargo auditable (dependency tree embedded)

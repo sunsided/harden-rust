@@ -8,7 +8,10 @@ summary: Crate metadata, per-crate versions, deny policy, release-plz and truste
 
 - Versions are SemVer 2.0 (Cargo's interpretation). Pre-releases (`-rc.1`) are fine, but
   build metadata (`+...`) is not.
-- Versions and `CHANGELOG.md` are managed by release-plz release PRs. Do not bump versions
+- GitVersion repos: the version comes from the branch and tags. `Cargo.toml` holds the
+  next `-alpha` placeholder, and stamping always runs `scripts/zero-version.sh` before
+  `cargo set-version`. Flag hand-edited versions.
+- release-plz repos: versions and `CHANGELOG.md` are managed by release-plz release PRs. Do not bump versions
   or edit generated changelog entries by hand in feature PRs.
 - Every publishable crate has `description`, `license`, `repository`, `readme`, `keywords`
   (at most 5) and `categories` (valid crates.io slugs), and declares `rust-version`. Crates that

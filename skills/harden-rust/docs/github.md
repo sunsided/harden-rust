@@ -3,7 +3,8 @@
 ## Baseline (CONTRIBUTING.md wins where it says otherwise)
 
 - **Branching model**:
-  - **GitHub Flow** for small repos: `main` plus `feature/<topic>`.
+  - **GitHub Flow** for small repos: `main` plus `feature/<topic>`. Releases may also be
+    cut from `release/*` or `hotfix/*` branches, which GitVersion builds as `-beta`.
   - **Git Flow** for larger or versioned-in-parallel repos: `main`, `develop`, `feature/*`,
     `release/*`, `hotfix/*` and `support/*`.
   - Ask with AskUserQuestion when the repo does not show a model yet (an existing `develop`

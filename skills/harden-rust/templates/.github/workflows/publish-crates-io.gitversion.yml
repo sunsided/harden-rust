@@ -1,0 +1,88 @@
+# GitVersion mode (docs/versioning.md): apply this file as .github/workflows/publish-crates-io.yml
+# instead of the release-plz variant. One shared workspace version; the vX.Y.Z (or vX.Y.Z-beta.N)
+# tag is the source of truth and is stamped into Cargo.toml before publishing every publishable
+# crate. Runs in the `crates-io` environment (tags v*.*.* only). Pin actions with scripts/pin-actions.py.
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions: {}
+
+jobs:
+  verify:
+    name: verify tagged commit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+      - run: cargo nextest run --workspace --all-features --locked
+      # Remove for binary-only crates (no library target, no doctests).
+      - run: cargo test --workspace --all-features --doc --locked
+
+  crates-io:
+    name: publish to crates.io
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-edit
+      - name: Stamp the tag's version into the workspace
+        run: |
+          sh scripts/zero-version.sh
+          cargo set-version "${GITHUB_REF_NAME#v}"
+      - name: Skip crates whose version is already on crates.io
+        id: plan
+        # The first release is published by hand, and re-runs must be harmless.
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          excludes=""
+          pending=0
+          for name in $(cargo metadata --no-deps --format-version 1 \
+              | jq -r '.packages[] | select(.publish == null or (.publish | index("crates-io"))) | .name'); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' -A "$GITHUB_REPOSITORY publish workflow" \
+              "https://crates.io/api/v1/crates/$name/$version")"
+            if [ "$status" = 200 ]; then
+              echo "::notice::$name $version is already on crates.io"
+              excludes="$excludes --exclude $name"
+            else
+              pending=$((pending + 1))
+            fi
+          done
+          echo "excludes=$excludes" >> "$GITHUB_OUTPUT"
+          echo "pending=$pending" >> "$GITHUB_OUTPUT"
+      - if: steps.plan.outputs.pending != '0'
+        uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - name: Publish (cargo orders the workspace by dependency)
+        if: steps.plan.outputs.pending != '0'
+        # --allow-dirty: the stamped version is an intentional, uncommitted change.
+        run: |
+          # shellcheck disable=SC2086 # EXCLUDES is a list of flags, split on purpose
+          cargo publish --workspace --locked --allow-dirty $EXCLUDES
+        env:
+          EXCLUDES: ${{ steps.plan.outputs.excludes }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

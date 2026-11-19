@@ -1,0 +1,20 @@
+# GitVersion 7 (v7 configuration format). GitHub Flow: main -> X.Y.Z-alpha.N,
+# release/* and hotfix/* -> X.Y.Z-beta.N, a vX.Y.Z tag -> X.Y.Z. docs/versioning.md
+calculation:
+  branches:
+    main:
+      label: alpha
+      mode: ContinuousDelivery
+    release:
+      label: beta
+      mode: ContinuousDelivery
+    hotfix:
+      increment: Patch
+      is-release-branch: true
+      label: beta
+      mode: ContinuousDelivery
+      regex: "^hotfix(es)?[/-](?<BranchName>.+)"
+      source-branches:
+        - main
+output: {}
+workflow: GitHubFlow/v1

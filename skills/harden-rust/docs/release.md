@@ -1,8 +1,11 @@
 # Release automation (release-plz, tag-driven publishing)
 
-Default: **release-plz in git-only mode** plus a **tag-triggered publish workflow**. The
-fallback is cargo-release, for repos that want tags pushed by a human (see the end of this
-file).
+This is the **release-plz mode**. For apps, Git Flow repos and shared-version workspaces,
+see the GitVersion mode in `docs/versioning.md`. The SemVer, tag-trigger, environment and
+trusted-publishing rules below apply to both modes.
+
+Here: **release-plz in git-only mode** plus a **tag-triggered publish workflow**. Releases
+cut by a human (tags, cargo-release) belong to the GitVersion mode (see the end of this file).
 
 ## Flow
 
@@ -147,16 +150,12 @@ release-plz's release PR always targets the default branch, so in Git Flow:
   trusted-publishing config, check that a release works, and only then delete the old
   config. Doing it in that order keeps a working path at every step.
 
-## Fallback: cargo-release
+## Human-driven releases
 
-Use it when a human runs releases:
-
-- `release.toml` with `tag-name = "v{{version}}"` (or `"{{crate_name}}-v{{version}}"`),
-  `publish = false`, and `push = true`.
-- `cargo release <level>` bumps, commits, tags and pushes. The same `publish-crates-io.yml` then
-  publishes from the tag.
-- Create the GitHub Release in `publish-crates-io.yml` with `gh release create "$GITHUB_REF_NAME" --generate-notes`.
-  That needs `contents: write` on that job.
+If a human should cut releases, for example with cargo-release, use the **GitVersion mode**
+(`docs/versioning.md`). It provides `task release:tag`, and `task release:cargo` for
+committed versions. The version then always comes from GitVersion. release-plz is for
+bot-driven releases only.
 
 Sources: https://release-plz.dev/docs/config (git_only, publish, pr_branch_prefix,
 custom_*_increment_regex, commit_parsers), https://release-plz.dev/docs/github/quickstart,

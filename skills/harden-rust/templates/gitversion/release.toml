@@ -1,0 +1,16 @@
+# cargo-release in GitVersion mode (optional; docs/versioning.md). The version always comes from
+# GitVersion: `task release:cargo` zeroes the version, stamps GitVersion's MajorMinorPatch with
+# cargo set-version, and lets `cargo release commit` write the "Release X.Y.Z" commit. (A plain
+# `cargo release <version>` refuses to move below the committed X.Y.Z-alpha placeholder.) Use it only when the
+# released version should be committed to Cargo.toml; otherwise `task release:tag` is enough,
+# because CI stamps the version from the tag anyway.
+shared-version = true
+consolidate-commits = true
+pre-release-commit-message = "Release {{version}}"
+tag-name = "v{{version}}"
+tag-message = "Release {{version}}"
+# Run on the release or hotfix branch (main is protected by the ruleset); tag main after the merge.
+allow-branch = ["release/*", "hotfix/*"]
+tag = false
+push = false
+publish = false

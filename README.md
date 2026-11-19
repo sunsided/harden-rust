@@ -66,6 +66,14 @@ It covers these areas:
   - wasm-bindgen, wasm-pack and trunk;
   - SvelteKit/Vite/yarn/corepack frontends;
   - cargo-sbom and npm trusted publishing.
+- **Versioning**: SemVer 2.0, in one of two modes.
+  - release-plz: bot-driven, per-crate, from commits.
+  - GitVersion 7: human-driven, shared version.
+    - `-alpha` on develop/main, `-beta` on release/hotfix, stable tags.
+    - PR builds keep the target's label: `scripts/ci-version.sh`.
+    - `scripts/zero-version.sh` works around the `cargo set-version` / cargo-release
+      "cannot downgrade" bug.
+    - `task release:tag`, plus optional cargo-release.
 - **Releases**:
   - release-plz (git-only mode) tags and creates GitHub Releases;
   - `publish-crates-io.yml` publishes from the tag in a tag-restricted `crates-io`
@@ -93,7 +101,7 @@ House style for every line of Rust that is written or reviewed:
 | `skills/harden-rust/SKILL.md` | Workflow, decision points, checklist |
 | `skills/harden-rust/docs/` | Deep dives per area (ci, lints, release, trusted-publishing, wasm, ...) |
 | `skills/harden-rust/templates/` | Taskfiles, workflows, configs with `__PLACEHOLDER__`s and tag-only action refs |
-| `skills/harden-rust/scripts/` | `pin-actions.py`, `trusted-publishing.py`, `check-branch.sh`, `check-commit-msg.py`, `lint-mermaid.py`, `review-index.py` |
+| `skills/harden-rust/scripts/` | `pin-actions.py`, `trusted-publishing.py`, `check-branch.sh`, `check-commit-msg.py`, `lint-mermaid.py`, `review-index.py`, `zero-version.sh`, `ci-version.sh` |
 | `skills/rust-style/` | Style rules and before/after examples |
 | `evals/` | Trigger evals for both skills |
 
@@ -110,4 +118,4 @@ Recommended companion: the `taskfile` / `taskfile-authoring` skills.
 
 `task`, `gh` (authenticated, for SHA pinning), `actionlint`, `zizmor`, `cargo-nextest`,
 `cargo-llvm-cov`, `cargo-deny`, `cargo-hack`, `cargo-semver-checks`, `cargo-fuzz` (nightly),
-`release-plz`, `typos`, `prek`, `cargo-auditable` / `auditable2cdx`, `mmdc` (mermaid-cli), `uvx` (for `reuse`).
+`release-plz`, `typos`, `prek`, `cargo-auditable` / `auditable2cdx`, `mmdc` (mermaid-cli), `uvx` (for `reuse`), `dotnet-gitversion` and `cargo-edit` (GitVersion mode).

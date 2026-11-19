@@ -86,6 +86,12 @@ works on them.
 
 ## Releases
 
+<!-- Keep the paragraph for this repo's versioning mode (docs/versioning.md), delete the other. -->
+Versions come from GitVersion (`GitVersion.yml`): every CI build of `develop` (Git Flow) or
+`main` (GitHub Flow) is `X.Y.Z-alpha.N`, `release/*` and `hotfix/*` builds are
+`X.Y.Z-beta.N`, and a `vX.Y.Z` tag on `main` is the stable release. CI stamps the version;
+do not edit `version` in `Cargo.toml` except to set the next `-alpha` after cutting a release.
+
 Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html), as Cargo
 implements it (in `0.x`, a minor bump is breaking).
 

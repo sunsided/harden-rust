@@ -1,0 +1,15 @@
+version = 1
+
+# Default: everything under the project license expression.
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "__YEAR__ __AUTHOR__"
+SPDX-License-Identifier = "__LICENSE__"
+
+# Examples are public domain so readers can copy them freely. Remove if not wanted.
+[[annotations]]
+path = ["examples/**", "crates/*/examples/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "__YEAR__ __AUTHOR__"
+SPDX-License-Identifier = "CC0-1.0"

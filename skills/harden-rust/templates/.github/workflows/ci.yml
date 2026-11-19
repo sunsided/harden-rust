@@ -1,0 +1,217 @@
+# Keep in sync with `task ci` in the Taskfile. Job `name:`s are the required status checks.
+# Action refs are tags here; run scripts/pin-actions.py to pin them to commit SHAs.
+name: CI
+
+on:
+  push:
+    branches: [__BRANCH__]
+  pull_request:
+  merge_group:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+  NEXTEST_NO_TESTS: warn
+
+jobs:
+  branch:
+    name: branch name
+    # Runs on PRs and merge queues (detached HEAD passes) so it can be a required check.
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # Set BRANCH_FLOW to gitflow for Git Flow repositories (same value as in the Taskfile).
+      - run: sh scripts/check-branch.sh "$HEAD_REF" github
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  style:
+    name: style (separators, README links, typos, review index, mermaid)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: No `// ----` separator comments
+        run: "! grep -rnE --include='*.rs' --exclude-dir=target --exclude-dir=.git '^[[:space:]]*//+[[:space:]]*[-=*#~_/]{4,}' ."
+      - name: Absolute URLs in README files
+        run: "! grep -rnoE --include='README.md' --exclude-dir=target --exclude-dir=.git '(\\]\\(|src=\")[^)\"]*' . | grep -vE ':(\\]\\(|src=\")(https?://|#|mailto:)'"
+      - name: Typos
+        uses: crate-ci/typos@v1
+      # Remove when the repository has no docs/review/ registry.
+      - name: Review index is current
+        run: python3 scripts/review-index.py --check
+      # Remove when the repository has no mermaid diagrams. Version: docs/automation.md.
+      - name: Mermaid diagrams render
+        run: python3 scripts/lint-mermaid.py
+        env:
+          MMDC: npx --yes @mermaid-js/mermaid-cli@__MERMAID_CLI_VERSION__
+          MMDC_NO_SANDBOX: "1"
+
+  doc:
+    name: rustdoc
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      # Drop the --html-in-header part when the repo has no docs/mermaid.html.
+      RUSTDOCFLAGS: -D warnings --html-in-header ${{ github.workspace }}/docs/mermaid.html
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --workspace --all-features --no-deps --document-private-items
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - run: cargo nextest run --workspace --all-features
+      # Remove for binary-only crates (no library target, no doctests).
+      - run: cargo test --workspace --all-features --doc
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov,cargo-nextest
+      - run: cargo llvm-cov nextest --workspace --all-features --lcov --output-path lcov.info
+      - uses: codecov/codecov-action@v7
+        with:
+          files: lcov.info
+          fail_ci_if_error: true
+          # OIDC everywhere except fork PRs, which get no id-token and upload tokenless instead.
+          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+          arguments: --all-features
+
+  msrv:
+    name: MSRV
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
+      - run: cargo hack check --rust-version --workspace --all-targets --ignore-private
+
+  # Fails until each library crate has a release on crates.io (no baseline yet); see docs/ci.md.
+  semver:
+    name: semver
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: obi1kenobi/cargo-semver-checks-action@v2
+
+  # Remove when the repository has no fuzz/ directory.
+  fuzz:
+    name: fuzz targets build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt, clippy
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-fuzz
+      - run: cargo +nightly fuzz build
+        working-directory: fuzz
+      - run: cargo fmt --all --check && cargo +nightly clippy --all-targets -- -D warnings
+        working-directory: fuzz

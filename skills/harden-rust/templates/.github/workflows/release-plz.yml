@@ -1,0 +1,67 @@
+# release-plz (git-only mode): keeps a release PR up to date on every push to __BRANCH__ and, once it
+# is merged, creates the vX.Y.Z / <crate>-vX.Y.Z tags and GitHub Releases. It never publishes: the
+# tag push starts publish-crates-io.yml, which publishes from the tag-restricted `crates-io` environment.
+# The App token matters: tags and PRs created with GITHUB_TOKEN would not trigger other workflows.
+# Git Flow repos drop the release-pr job (docs/release.md). Pin actions with scripts/pin-actions.py.
+name: Release-plz
+
+on:
+  push:
+    branches: [__BRANCH__]
+
+permissions: {}
+
+jobs:
+  release-plz-release:
+    name: Release-plz release
+    if: github.repository_owner == '__OWNER__'
+    runs-on: ubuntu-latest
+    # No concurrency group here: cancelling a pending run could skip a release.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: read
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: release-plz/action@v0.5
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+  release-plz-pr:
+    name: Release-plz PR
+    if: github.repository_owner == '__OWNER__'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

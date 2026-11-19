@@ -1,0 +1,121 @@
+# WASM targets and web frontend. Delete jobs that do not apply (see docs/wasm.md).
+# Action refs are tags here; pin with scripts/pin-actions.py.
+name: WASM
+
+on:
+  push:
+    branches: [__BRANCH__]
+  pull_request:
+  merge_group:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  clippy:
+    name: clippy (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [wasm32-unknown-unknown, wasm32-wasip1]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      # Default features only: threaded code must stay behind a feature that wasm builds leave off.
+      - run: cargo clippy --target "$TARGET" -p __CORE_CRATE__ --all-targets -- -D warnings
+        env:
+          TARGET: ${{ matrix.target }}
+
+  wasi-test:
+    name: test (wasm32-wasip1, wasmtime)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip1
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasmtime
+      - run: cargo test --target wasm32-wasip1 -p __CORE_CRATE__
+        env:
+          CARGO_TARGET_WASM32_WASIP1_RUNNER: wasmtime
+
+  browser-test:
+    name: test (browser, wasm-bindgen-test)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Read wasm-bindgen version from Cargo.lock
+        id: wb
+        run: echo "version=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "wasm-bindgen") | .version' | head -1)" >> "$GITHUB_OUTPUT"
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@${{ steps.wb.outputs.version }}
+      - run: cargo test --target wasm32-unknown-unknown -p __WASM_CRATE__
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner
+          WASM_BINDGEN_USE_BROWSER: "1"
+          GECKODRIVER: geckodriver
+
+  web:
+    name: web (build, check, test)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: __WEB_DIR__
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+      # corepack (bundled with the runner's preinstalled Node) must be active before
+      # setup-node's yarn cache step runs yarn.
+      - run: corepack enable
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: __WEB_DIR__/.nvmrc
+          cache: yarn
+          cache-dependency-path: __WEB_DIR__/yarn.lock
+      - run: yarn install --immutable
+      - run: yarn build:wasm
+      - run: yarn check
+      - run: yarn lint
+      - run: yarn test
+      - run: yarn build

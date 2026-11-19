@@ -16,8 +16,8 @@ behavior.
 - **CI flags:** `ci.yml` sets no global `RUSTFLAGS`. clippy and rustdoc get `-D warnings`
   explicitly, in CI and in the tasks alike, so `task ci` and CI behave the same.
 - **Task names and structure:** this template wins over taskfile-authoring's suggestions on
-  names and on structure (`fuzz:build` sits in `ci`, not in `build`; cargo itself needs no
-  precondition), because
+  names and on structure (`build` builds benches through `--all-targets` and calls `fuzz:build`; cargo itself needs
+  no precondition), because
   CI, hooks, Copilot rules and CONTRIBUTING.md reference them. `doc` and `test:doc` carry
   `docs` and `test:docs` aliases.
 - **nextest preferred.** The `NEXTEST` var detects `cargo nextest`. `test` uses nextest when
@@ -34,7 +34,7 @@ behavior.
   Only the separate, prompting task `fuzz:clean:artifacts` deletes them.
 - **Drop what does not apply.** Calling a missing included task fails, even though the
   `includes` entry is `optional`.
-  - No `fuzz/` directory: remove `fuzz:build` and `fuzz:lint` from `ci`, `fuzz:fmt` from
+  - No `fuzz/` directory: remove `fuzz:build` from `build` and `ci`, `fuzz:lint` from `ci`, `fuzz:fmt` from
     `fmt`, and `fuzz:clean` from `clean`.
   - `lint:mermaid` and `lint:review` pass by themselves when there are no diagrams or no
     `docs/review/`. They need their scripts copied to `scripts/`.

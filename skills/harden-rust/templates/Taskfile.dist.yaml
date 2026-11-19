@@ -30,9 +30,10 @@ tasks:
     silent: true
 
   build:
-    desc: Build all targets in the workspace
+    desc: Build all targets in the workspace (benches included), then the fuzz targets
     cmds:
       - cargo build --workspace --all-targets --all-features {{.CLI_ARGS}}
+      - task: fuzz:build
 
   test:
     desc: Run tests (nextest if installed, cargo test otherwise), then doctests

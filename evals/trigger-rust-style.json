@@ -1,0 +1,54 @@
+[
+  {
+    "query": "Implement a Grid struct in Rust with get/set and neighbor iteration",
+    "should_trigger": true
+  },
+  {
+    "query": "Refactor this 200-line Rust simulation tick function, it's unreadable",
+    "should_trigger": true
+  },
+  {
+    "query": "Review src/engine.rs for code quality",
+    "should_trigger": true
+  },
+  {
+    "query": "Add a new module `net` with client and server submodules to my Rust crate",
+    "should_trigger": true
+  },
+  {
+    "query": "Write doc comments for the types in src/model.rs",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the clippy pedantic warnings in this crate",
+    "should_trigger": true
+  },
+  {
+    "query": "Add a proptest for the encode/decode roundtrip in my Rust codec",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a TypeScript utility for debouncing",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up codecov and release-plz for my Rust repo",
+    "should_trigger": false
+  },
+  {
+    "query": "What's the difference between Box and Rc?",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a Taskfile for my Go project",
+    "should_trigger": false
+  },
+  {
+    "query": "Add a mermaid state diagram to the docs of my Rust game state enum",
+    "should_trigger": true
+  },
+  {
+    "query": "Configure Dependabot grouping for my repo",
+    "should_trigger": false
+  }
+]

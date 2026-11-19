@@ -1,0 +1,74 @@
+[
+  {
+    "query": "Set up CI for my Rust crate with clippy, tests on all three OSes and coverage on codecov",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to publish my workspace's three crates to crates.io with automated releases and trusted publishing. How do I set that up?",
+    "should_trigger": true
+  },
+  {
+    "query": "Harden this repo: it's a Rust library, there's no CI yet, no Taskfile, and I want cargo-deny and dependabot",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit my Rust project setup and tell me what's missing for a production-quality open source crate",
+    "should_trigger": true
+  },
+  {
+    "query": "Add release-plz to this repo so every merge to main opens a release PR",
+    "should_trigger": true
+  },
+  {
+    "query": "My Rust game compiles to wasm with wasm-pack and has a SvelteKit frontend using yarn; set up CI for both and pin all actions",
+    "should_trigger": true
+  },
+  {
+    "query": "Configure crates.io trusted publishing for all 14 crates in this workspace, I don't want to click through the UI",
+    "should_trigger": true
+  },
+  {
+    "query": "Our GitHub workflows fail zizmor; fix the findings and add actionlint",
+    "should_trigger": true
+  },
+  {
+    "query": "Implement a binary search tree in Rust with insert and delete",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the borrow checker error in src/parser.rs",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up GitHub Actions for my Python package with pytest and ruff",
+    "should_trigger": false
+  },
+  {
+    "query": "Add a test:integration task to the Taskfile that loads .env.local",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain what Rust's orphan rule is",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this Rust function for idiomatic style",
+    "should_trigger": false
+  },
+  {
+    "query": "Ship release binaries for my Rust CLI including a static musl build, with SBOMs and GitHub attestations attached to the release",
+    "should_trigger": true
+  },
+  {
+    "query": "Set up a crates-io deployment environment restricted to version tags and a ruleset with required status checks for my crate's repo",
+    "should_trigger": true
+  },
+  {
+    "query": "Add a CONTRIBUTING.md, prek hooks and Copilot review instructions to this Rust workspace",
+    "should_trigger": true
+  },
+  {
+    "query": "Our Rust repo uses fix/ and chore/ branches and conventional commits; move it to GitHub Flow with imperative commits and enforce it",
+    "should_trigger": true
+  }
+]

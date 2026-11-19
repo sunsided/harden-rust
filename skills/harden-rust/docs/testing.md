@@ -56,6 +56,20 @@ Present the candidates with AskUserQuestion (multiSelect), with the recommended 
   micro-benchmarks.
 - Put them in `benches/<name>.rs`, with a `[[bench]] name = "<name>" harness = false` entry in
   `Cargo.toml`.
+- **criterion without its macros:** `criterion_group!` and `criterion_main!` generate
+  undocumented functions, which fail `missing_docs`. Write a documented `main` instead:
+
+  ```rust
+  /// Runs every benchmark in this file with criterion's command-line flags.
+  fn main() {
+      let mut criterion = Criterion::default().configure_from_args();
+
+      bench_step(&mut criterion);
+      criterion.final_summary();
+  }
+  ```
+- proptest strategies and assertions need `Debug` on the types involved. Derive it, and
+  document why when the derive exists only for tests.
 - Benchmark the hot paths named by the user or found in the code (parsers, simulation steps,
   solvers). Do not benchmark trivial getters.
 - Run with `task bench`. CI compiles the benches (`--all-targets` in clippy and build) but does

@@ -60,6 +60,8 @@ below means this skill's directory.
 | Phase | Question | Doc |
 |---|---|---|
 | 2 | Branching model (GitHub Flow / Git Flow), if not evident | `github.md` |
+| 2 | Commit style when history uses another convention (e.g. Conventional Commits) and CONTRIBUTING.md is silent | `github.md` |
+| 2 | Non-conforming branches: rename locally (remote renames are outward-facing) or leave | `github.md` |
 | 2 | License scheme; CC0 examples (only if `examples/` exists) | `licensing.md` |
 | 2 | Which crates publish; renaming names taken on crates.io | `release.md` |
 | 2 | Per-crate versions when `version.workspace = true` | `release.md` |
@@ -98,6 +100,8 @@ Collect facts and print them as a gap table (area, current state, target, action
 - Conventions: CONTRIBUTING.md, REVIEW.md, `docs/review/`, CLAUDE.md / AGENTS.md. For the
   branches, run `git branch -a`: a `develop` branch means Git Flow, and non-conforming
   branches get flagged. For the commit style, run `git log --format=%s -20`.
+- Tracked build output: `git ls-files target | head`. If anything is tracked, untrack it with
+  `git rm -r --cached target`.
 - GitHub: `git remote get-url origin`, then
   `gh repo view --json visibility,description,repositoryTopics,homepageUrl`. If that fails,
   the repo does not exist yet, and every GitHub step goes to the Phase 6 checklist.
@@ -135,6 +139,10 @@ In this order. Commit after each step with an imperative message. Do not push.
    - `docs/ci.md`: `ci.yml` and `actions-lint.yml`.
    - Copy the scripts the tasks call (`check-branch.sh`, `check-commit-msg.py`,
      `lint-mermaid.py`, `review-index.py`) to `scripts/`.
+   - Wire in only what exists so far. Areas created by later steps add their own pieces when
+     they land: step 5 adds the `fuzz/` include, its tasks and the CI `fuzz` job (after
+     `cargo fuzz init`, which refuses an existing `fuzz/`). Step 6 adds `--html-in-header`
+     to `doc` and to the CI `doc` job.
 2. **Coverage**: `docs/coverage.md`, `codecov.yml`.
 3. **Supply chain**: `docs/supply-chain.md`. `deny.toml`, `dependabot.yml`, `_typos.toml`.
 4. **Licensing**: `docs/licensing.md`, `REUSE.toml`.
@@ -192,7 +200,7 @@ cargo deny check
 prek validate-config .pre-commit-config.yaml
 uvx reuse lint
 cargo package --list -p <crate>                   # LICENSES/, README, docs/mermaid.html included
-release-plz update --dry-run
+release-plz release --dry-run                     # and `release-plz update` on a throwaway branch
 python3 <skill>/scripts/trusted-publishing.py     # read-only
 git grep -nE '__[A-Z][A-Z_]*__'                   # no placeholders left
 ```

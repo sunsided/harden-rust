@@ -81,8 +81,23 @@ Commits use imperative mood (`docs/github.md`). `templates/release-plz.toml` set
 - If CONTRIBUTING.md defines Conventional Commits instead, drop the custom regexes and the
   parsers. release-plz's defaults handle Conventional Commits.
 
-Verify the config with `release-plz update --dry-run` (or `release-plz release-pr --dry-run`)
-when release-plz is installed.
+Changelog hygiene:
+
+- release-plz assigns every commit that touches a crate's files to that crate's changelog,
+  infra commits included. Keep repo-infrastructure changes in commits that do not touch crate
+  sources where practical.
+- Review the release PR's changelog before merging. It is a normal file in the PR and can be
+  edited there.
+
+Verify the config when release-plz is installed. `release-plz update` has no dry-run, so
+run it on a throwaway branch:
+
+```sh
+git switch -c tmp/release-check && release-plz update && git diff --stat
+git restore . && git switch - && git branch -D tmp/release-check
+```
+
+`release-plz release --dry-run` checks the release step.
 
 ## GitHub App (one-time, reusable across repos)
 

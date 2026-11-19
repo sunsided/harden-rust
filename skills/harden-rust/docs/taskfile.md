@@ -13,7 +13,11 @@ behavior.
   - Carry user flags (for example `-- --test-threads=1`) into every variant: nextest,
     `cargo test` and coverage.
   - Existing tasks without preconditions get them (taskfile-authoring rule).
-- **Task names:** this template's names win over taskfile-authoring's suggestions, because
+- **CI flags:** `ci.yml` sets no global `RUSTFLAGS`. clippy and rustdoc get `-D warnings`
+  explicitly, in CI and in the tasks alike, so `task ci` and CI behave the same.
+- **Task names and structure:** this template wins over taskfile-authoring's suggestions on
+  names and on structure (`fuzz:build` sits in `ci`, not in `build`; cargo itself needs no
+  precondition), because
   CI, hooks, Copilot rules and CONTRIBUTING.md reference them. `doc` and `test:doc` carry
   `docs` and `test:docs` aliases.
 - **nextest preferred.** The `NEXTEST` var detects `cargo nextest`. `test` uses nextest when
@@ -38,7 +42,8 @@ behavior.
 - **Task's shell is not bash.** `! a | b` does not negate a pipeline there. Use
   `if a | b; then exit 1; fi` (see `lint:readme`). Env set on a task does not reach tasks
   it calls through `task:`. Run a nested `task <name>` command instead (see `test:prop`).
-- **Gitignore:** make sure `.gitignore` has `/target` and `lcov.info`. Commit `Cargo.lock`,
+- **Gitignore:** make sure `.gitignore` has `/target` and `lcov.info`. Untrack build output
+  that was committed by mistake (`git rm -r --cached target`). Commit `Cargo.lock`,
   for libraries too (current Cargo guidance).
 - **No benches:** keep `bench` anyway, so that it is ready when benches are added.
 

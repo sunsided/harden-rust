@@ -27,8 +27,9 @@ files and in Rust doc comments (`//!`, `///`). It renders each block with mermai
 and reports the broken ones as `file:line`.
 
 - Copy the script to `scripts/lint-mermaid.py` in the repo, so hooks and CI can call it.
-- Taskfile: `lint:mermaid` runs `python3 scripts/lint-mermaid.py`. It has a precondition on
-  `mmdc`, or on `MMDC` being set.
+- Taskfile: `lint:mermaid` runs `python3 scripts/lint-mermaid.py`. With no diagrams it
+  passes without mermaid-cli. With diagrams, the script stops with an install hint when
+  `mmdc` (or the `MMDC` command) is missing.
 - CI (only when the repo has diagrams): add a step to the `style` job that sets
   `MMDC: npx --yes @mermaid-js/mermaid-cli@<exact version>` and `MMDC_NO_SANDBOX: "1"`.
   Resolve the version with

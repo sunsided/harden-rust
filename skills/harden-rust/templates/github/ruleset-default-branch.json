@@ -38,6 +38,7 @@
           { "context": "coverage" },
           { "context": "cargo-deny" },
           { "context": "MSRV" },
+          { "context": "fuzz targets build" },
           { "context": "actionlint" },
           { "context": "zizmor" }
         ]

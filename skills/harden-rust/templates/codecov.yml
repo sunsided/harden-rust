@@ -14,5 +14,5 @@ comment:
 
 ignore:
   - "fuzz/**"
-  - "benches/**"
-  - "examples/**"
+  - "**/benches/**"
+  - "**/examples/**"

@@ -55,6 +55,17 @@ def resolve(repo, ref):
     """
     tags = tags_of(repo)
 
+    # Floating version refs (v1, v1.2) pin to the newest matching full release tag, which is
+    # what Dependabot and hook freezing report too; branch refs (stable, main) pin as they are.
+    if re.fullmatch(r"v?\d+(\.\d+)?", ref):
+        releases = sorted(
+            (t for t in tags if t.startswith(ref + ".") and re.fullmatch(r"v?\d+\.\d+\.\d+", t)),
+            key=version_key,
+        )
+
+        if releases:
+            return tags[releases[-1]], releases[-1]
+
     try:
         sha = gh_json(f"repos/{repo}/commits/{ref}")["sha"]
     except subprocess.CalledProcessError:

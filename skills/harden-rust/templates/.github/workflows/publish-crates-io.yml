@@ -55,6 +55,8 @@ jobs:
         id: crate
         run: |
           # <crate>-vX.Y.Z first, so crate names starting with "v" are not mistaken for vX.Y.Z.
+          # Multi-crate repo where no crate keeps plain vX.Y.Z tags: delete the v[0-9]* case and
+          # the two 'v[0-9]+...' tag filters above.
           case "$GITHUB_REF_NAME" in
             *-v[0-9]*) name="${GITHUB_REF_NAME%-v*}"; version="${GITHUB_REF_NAME##*-v}" ;;
             v[0-9]*)   name="__CRATE__"; version="${GITHUB_REF_NAME#v}" ;;

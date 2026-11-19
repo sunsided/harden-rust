@@ -19,10 +19,19 @@
 - **Commit style: imperative mood**, Git's own convention. Examples: "Add proptest for the
   parser round-trip", "Fix overflow in tile index". Not Conventional Commits (`feat: ...`),
   and not past tense ("Added ...").
-  - Subject at most 72 characters, capitalized, no trailing period. Then a blank line and a
-    body that explains *why*.
+  - Subject at most 72 characters, capitalized, no trailing period. For anything non-trivial,
+    a blank line and a body that explains *why*. The hook checks the subject and the blank
+    line, but not whether a body exists.
   - Enforcement: `scripts/check-commit-msg.py` as a `commit-msg` hook. release-plz maps
     imperative verbs to changelog groups and bumps (`templates/release-plz.toml`).
+- **Existing history with another convention**: if the history uses another style (for
+  example Conventional Commits) and CONTRIBUTING.md says nothing, ask. Recommend the
+  imperative baseline from now on, without rewriting history. If the user keeps
+  Conventional Commits, write that into CONTRIBUTING.md, drop the commit-msg hook and the
+  custom bump regexes, and drop the commit parsers (`docs/release.md`).
+- **Non-conforming branches** (for example `fix/old-thing`): list them, and ask whether to
+  rename them. A local rename is `git branch -m fix/x feature/x`. Renaming on the remote
+  uses the same API call as for `copilot/*` branches (below), and needs confirmation.
 - **Agents follow the baseline too.** This skill's own work happens on a `feature/<topic>`
   branch (for example `feature/harden-ci`), with imperative commits. Read CONTRIBUTING.md
   first. If it defines another model or style, that wins, and the checks are adapted to it

@@ -9,12 +9,14 @@ Inspect the repo, then recommend one of these:
 
 | Repo signal | Recommend |
 |---|---|
-| Single crate, under ~5k lines, one or two areas | **Light**: Copilot instruction files only, no registry |
-| Workspace with several crates, or distinct areas (core, wasm, web, CI, release), or several contributors or agents | **Registry**: `REVIEW.md` plus `docs/review/` |
+| Under ~5k lines of Rust and at most 2 crates, with no wasm or web part | **Light**: Copilot instruction files only, no registry |
+| 3 or more crates, or over ~5k lines, or a wasm or web part, or several regular contributors or agents | **Registry**: `REVIEW.md` plus `docs/review/` |
 | Existing `REVIEW.md` or review docs | **Registry**, migrating the existing content into topics |
 
+Size breaks the tie. A tiny 2-crate workspace is light.
+
 State the signals you found (crate count, line count via `tokei` or `wc -l`, areas,
-contributors via `git shortlog -sn | wc -l`), and put the recommended option first.
+contributors via `git shortlog -sn HEAD | wc -l`), and put the recommended option first.
 
 ## Light setup
 

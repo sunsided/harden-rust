@@ -26,8 +26,9 @@ license expression per crate.
   If `uvx` is unavailable or not allowed, download the texts from SPDX:
   `curl -fsSo LICENSES/<ID>.txt https://raw.githubusercontent.com/spdx/license-list-data/main/text/<ID>.txt`.
 - `REUSE.toml` (template): it maps paths to licenses. `__AUTHOR__` comes from `authors` in
-  `Cargo.toml`, the git history's main author (`git shortlog -sne | head -1`), or "The
-  <project> contributors". Ask when unsure. `__YEAR__` is the year of the first commit, or the
+  `Cargo.toml`, the git history's main author (`git shortlog -sne HEAD | head -1`), or "The
+  <project> contributors". Skip placeholder identities, such as one-letter names or emails
+  without a real domain, and fall back to the contributors form. Ask when unsure. `__YEAR__` is the year of the first commit, or the
   current year for new projects. The default rule covers the whole repo
   with the project license, and an override marks `examples/**` as `CC0-1.0`.
 - `Cargo.toml`: in a workspace, set `license = "..."` in `[workspace.package]` and

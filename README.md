@@ -119,3 +119,14 @@ Recommended companion: the `taskfile` / `taskfile-authoring` skills.
 `task`, `gh` (authenticated, for SHA pinning), `actionlint`, `zizmor`, `cargo-nextest`,
 `cargo-llvm-cov`, `cargo-deny`, `cargo-hack`, `cargo-semver-checks`, `cargo-fuzz` (nightly),
 `release-plz`, `typos`, `prek`, `cargo-auditable` / `auditable2cdx`, `mmdc` (mermaid-cli), `uvx` (for `reuse`), `dotnet-gitversion` and `cargo-edit` (GitVersion mode).
+
+## License
+
+Licensed under either of
+
+- European Union Public Licence, Version 1.2 ([LICENSES/EUPL-1.2.txt](LICENSES/EUPL-1.2.txt))
+- Mozilla Public License, Version 2.0 ([LICENSES/MPL-2.0.txt](LICENSES/MPL-2.0.txt))
+
+at your option. Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this work by you shall be licensed as above, without any additional terms or
+conditions.

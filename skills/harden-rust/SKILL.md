@@ -149,7 +149,7 @@ In this order. Commit after each step with an imperative message. Do not push.
      to `doc` and to the CI `doc` job.
 2. **Coverage**: `docs/coverage.md`, `codecov.yml`.
 3. **Supply chain**: `docs/supply-chain.md`. `deny.toml`, `dependabot.yml`, `_typos.toml`.
-4. **Licensing**: `docs/licensing.md`, `REUSE.toml`.
+4. **Licensing**: `docs/licensing.md`, `REUSE.toml.template` (applied as `REUSE.toml`).
 5. **Testing scaffolds**: `docs/testing.md`.
 6. **Documentation**: `docs/documentation.md` (mermaid on docs.rs, README doctests), `docs/mermaid.html`.
 7. **WASM and web** (if present): `docs/wasm.md`, `wasm.yml`.

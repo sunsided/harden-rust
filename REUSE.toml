@@ -1,0 +1,7 @@
+version = 1
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Markus Mayer"
+SPDX-License-Identifier = "EUPL-1.2 OR MPL-2.0"

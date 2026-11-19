@@ -25,7 +25,7 @@ license expression per crate.
   `uvx reuse download --all` after writing `REUSE.toml`. Never type license texts from memory.
   If `uvx` is unavailable or not allowed, download the texts from SPDX:
   `curl -fsSo LICENSES/<ID>.txt https://raw.githubusercontent.com/spdx/license-list-data/main/text/<ID>.txt`.
-- `REUSE.toml` (template): it maps paths to licenses. `__AUTHOR__` comes from `authors` in
+- `REUSE.toml` (from `templates/REUSE.toml.template`; the suffix keeps reuse from reading the template as config): it maps paths to licenses. `__AUTHOR__` comes from `authors` in
   `Cargo.toml`, the git history's main author (`git shortlog -sne HEAD | head -1`), or "The
   <project> contributors". Skip placeholder identities, such as one-letter names or emails
   without a real domain, and fall back to the contributors form. Ask when unsure. `__YEAR__` is the year of the first commit, or the

@@ -3,14 +3,12 @@ name: harden-rust
 description: >
   Use when the user wants to harden, bootstrap, audit or "productionize" a Rust repository:
   Taskfile tasks, GitHub Actions CI (actionlint, zizmor, SHA pinning), codecov, pedantic clippy
-  and doc-comment lints, forbid(unsafe_code), cargo-deny, Dependabot, MSRV and semver checks,
-  typos, git hooks (prek), fuzz/proptest/benchmark scaffolding, licensing (EUPL/MPL or
-  MIT/Apache, REUSE), README badges and doctests, mermaid diagrams on docs.rs, crate and GitHub
-  metadata, branching model and commit style, repo settings, rulesets and deployment
-  environments, Copilot review rules and a REVIEW.md registry, CONTRIBUTING.md, WASM targets
-  (wasm-bindgen, wasm-pack, trunk, WASI) with SvelteKit/Vite/yarn frontends, release binaries
-  with cargo auditable, SBOMs and attestations, and releases with release-plz and crates.io
-  trusted publishing, including multi-crate workspaces. Trigger on "harden this repo",
+  and doc lints, forbid(unsafe_code), cargo-deny, Dependabot, MSRV and semver checks, typos,
+  git hooks (prek), fuzz/proptest/bench scaffolding, licensing (REUSE), README badges,
+  mermaid on docs.rs, crate and GitHub metadata, branching and commit style, repo settings,
+  rulesets and deployment environments, Copilot review rules, CONTRIBUTING.md, WASM targets (wasm-pack, trunk, WASI),
+  release binaries with SBOMs, and releases with release-plz and crates.io trusted
+  publishing, including workspaces. Trigger on "harden this repo",
   "set up CI for my crate", "prepare this crate for crates.io", "add release automation",
   "set up trusted publishing", "make this repo production ready", "audit my Rust project
   setup", even without the word "harden". Skip for writing or reviewing Rust code itself

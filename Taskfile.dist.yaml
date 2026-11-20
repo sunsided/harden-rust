@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Package each skill into a versioned dist/<skill>-<version>.skill bundle
+    sources:
+      - skills/**/*
+      - scripts/build-skills.py
+    generates:
+      - dist/*.skill
+    preconditions:
+      - sh: command -v python3
+        msg: python3 is required to build the .skill bundles
+    cmds:
+      - python3 scripts/build-skills.py
+
+  clean:
+    desc: Remove build output
+    cmds:
+      - rm -rf dist

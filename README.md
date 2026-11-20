@@ -153,6 +153,9 @@ ln -s "$(pwd)/skills/harden-rust" ~/.claude/skills/harden-rust
 ln -s "$(pwd)/skills/rust-style" ~/.claude/skills/rust-style
 ```
 
+Or as `.skill` bundles for upload: `task build` writes `dist/<skill>-<version>.skill`, with the
+version taken from each `SKILL.md`.
+
 Recommended companion: the `taskfile` / `taskfile-authoring` skills from
 [sunsided/taskfile-skills](https://github.com/sunsided/taskfile-skills).
 

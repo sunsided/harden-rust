@@ -25,5 +25,6 @@ summary: Crate metadata, per-crate versions, deny policy, release-plz and truste
 - release-plz runs in git-only mode: it tags and creates GitHub Releases. `publish-crates-io.yml`
   publishes from the tag in the `crates-io` environment, via trusted publishing
   (`id-token: write`, no `CARGO_REGISTRY_TOKEN`). Keep it that way.
-- Changelog groups and minor bumps come from imperative subject verbs (`release-plz.toml`).
+- Changelog groups and bumps come from imperative subject verbs (`release-plz.toml`). In 0.x, additions
+  are patch and breaking changes minor; a `custom_major_increment_regex` on a 0.x crate is a bug (it jumps to 1.0.0).
   A subject that hides a feature behind "Update ..." lands under Changed. Flag it.

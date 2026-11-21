@@ -21,8 +21,9 @@ flowchart LR
    `release/...` branch (`pr_branch_prefix`), titled "Release v1.2.3" instead of release-plz's
    default "chore: release v1.2.3" (`pr_name`).
    - The PR bumps each changed crate's version and updates its `CHANGELOG.md`.
-   - The bump comes from imperative commit verbs (`custom_minor_increment_regex`), and
-     cargo-semver-checks escalates it to major when the API breaks.
+   - The bump comes from imperative commit verbs (`custom_*_increment_regex`), and
+     cargo-semver-checks escalates it to a breaking bump (minor in 0.x, major from 1.0)
+     when the API breaks.
 2. Merging that PR runs `release-plz release`. With `git_only = true`, release-plz reads
    versions from git tags instead of crates.io. It creates the tags and one GitHub Release
    per tag, with the changelog as the body. It never runs `cargo publish`.
@@ -79,9 +80,20 @@ Commits use imperative mood (`docs/github.md`). `templates/release-plz.toml` set
 - `commit_parsers` maps leading verbs to changelog groups: Add/Introduce go to Added,
   Fix/Correct to Fixed, Remove/Drop to Removed, Deprecate to Deprecated, Bump to
   Dependencies. Everything else goes to Changed.
-- `custom_minor_increment_regex` makes the same "Add..." verbs a minor bump.
-  `custom_major_increment_regex` reacts to a `BREAKING CHANGE:` line in the body. semver-checks
-  catches API breaks either way.
+- The bump regexes follow Cargo's compatibility rule, so they depend on the crate's major.
+  release-plz applies `custom_*_increment_regex` regardless of the version: a minor regex
+  bumps 0.x minor, and a major regex turns 0.x into 1.0.0. Pick the pair per crate:
+
+  | Crate version | Patch | Minor | Major |
+  |---|---|---|---|
+  | `0.x` | Add, Fix, everything else | Break/Change/Rename/Replace/Remove/Drop/Delete subjects, `BREAKING CHANGE:` line, semver-checks break | never automatic (`set-version` for 1.0.0) |
+  | `>= 1.0` | Fix, everything else | Add/Introduce/Support/Allow/Implement/Expose subjects | `Break` subject, `BREAKING CHANGE:` line, semver-checks break |
+
+  The template ships the 0.x line and the >= 1.0 pair as a comment. When a crate reaches
+  1.0.0, swap them in the same PR. In a workspace whose crates sit on both sides, put the
+  >= 1.0 pair into those crates' `[[package]]` entries.
+- Existing `release-plz.toml` files: add `pr_name` if missing (otherwise release PRs are
+  titled "chore: release ..."), and replace any `custom_major_increment_regex` on a 0.x crate.
 - If CONTRIBUTING.md defines Conventional Commits instead, drop the custom regexes and the
   parsers. release-plz's defaults handle Conventional Commits.
 

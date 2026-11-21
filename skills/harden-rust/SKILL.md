@@ -203,8 +203,7 @@ Name every check you skipped.
 
 ```sh
 task ci                                           # or its subtasks
-actionlint                                        # snap install: actionlint -stdin-filename f - < f
-zizmor .github/
+task lint:actions                                 # actionlint + zizmor via uvx; never snap actionlint
 cargo deny check
 prek validate-config .pre-commit-config.yaml
 uvx reuse lint

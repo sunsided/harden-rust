@@ -5,7 +5,8 @@
 
 Resolves every `owner/repo[/path]@ref` that is not already a 40-character SHA through `gh api`,
 rewrites it to `@<sha> # <most specific tag>` and leaves local (`./`) and `docker://` uses alone.
-For dtolnay/rust-toolchain, whose ref names the toolchain, it adds an explicit `toolchain:` input.
+dtolnay/rust-toolchain is pinned to `master` instead: its toolchain-named branches (`stable`,
+`nightly`, `1.85`) break Dependabot, so the toolchain moves into an explicit `toolchain:` input.
 Requires an authenticated `gh` CLI.
 """
 
@@ -111,8 +112,17 @@ def step_lines(lines, start, key_indent):
 
 
 def toolchain_input(lines, start, key_indent, toolchain):
-    """Ensure the step at `start` passes `toolchain:` in its `with:` block."""
+    """Ensure the step at `start` passes `toolchain:` in its `with:` block.
+
+    `toolchain` is None for a step already on `@master`: then a missing input only warns.
+    """
     pad = " " * key_indent
+
+    def insert(at, text):
+        if toolchain:
+            lines.insert(at, text)
+        else:
+            print(f"warning: line {start + 1}: rust-toolchain@master without `toolchain:`; add it by hand")
 
     for index in step_lines(lines, start, key_indent):
         if lines[index].startswith(pad + "with:") and lines[index].strip() != "with:":
@@ -125,11 +135,11 @@ def toolchain_input(lines, start, key_indent, toolchain):
             block = list(step_lines(lines, index, key_indent + 1))
 
             if not any(lines[i].strip().startswith("toolchain:") for i in block):
-                lines.insert(index + 1, f"{pad}  toolchain: {toolchain}\n")
+                insert(index + 1, f"{pad}  toolchain: {toolchain}\n")
 
             return
 
-    lines.insert(start + 1, f"{pad}with:\n{pad}  toolchain: {toolchain}\n")
+    insert(start + 1, f"{pad}with:\n{pad}  toolchain: {toolchain}\n")
 
 
 def pin_file(path):
@@ -144,10 +154,23 @@ def pin_file(path):
         match = USES.match(lines[index].rstrip("\n"))
         index += 1
 
-        if not match or SHA.match(match["ref"]):
+        if not match:
             continue
 
         repo, ref = match["repo"], match["ref"]
+        pinned = (match["comment"] or "").lstrip(" #").split(" ")[0]
+        toolchain = None
+
+        # Dependabot cannot follow a SHA pinned to a toolchain branch; track master instead.
+        # This also repins `@<sha> # stable` left by older versions of this script.
+        if repo == "dtolnay/rust-toolchain" and SHA.match(ref) and pinned and pinned != "master":
+            ref = pinned
+        elif SHA.match(ref):
+            continue
+
+        if repo == "dtolnay/rust-toolchain" and ref != "master":
+            toolchain, ref = ref, "master"
+
         sha, label = resolve(repo, ref)
         newer = newer_major(repo, label)
 
@@ -159,7 +182,7 @@ def pin_file(path):
         changes += 1
 
         if repo == "dtolnay/rust-toolchain":
-            toolchain_input(lines, index - 1, len(match["indent"]) + len(dash), ref)
+            toolchain_input(lines, index - 1, len(match["indent"]) + len(dash), toolchain)
 
     with open(path, "w", encoding="utf-8") as handle:
         handle.writelines(lines)

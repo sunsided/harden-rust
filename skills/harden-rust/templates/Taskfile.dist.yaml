@@ -142,13 +142,12 @@ tasks:
   lint:actions:
     desc: Lint GitHub Actions workflows (actionlint + zizmor)
     preconditions:
-      - sh: command -v actionlint
-        msg: "actionlint not found - https://github.com/rhysd/actionlint/blob/main/docs/install.md"
-      - sh: command -v zizmor
-        msg: "zizmor not found - https://docs.zizmor.sh/installation/"
+      - sh: command -v uvx
+        msg: "uvx not found - https://docs.astral.sh/uv/getting-started/installation/"
     cmds:
-      - actionlint
-      - zizmor .github/
+      # Run through uvx, not a local install: the snap build cannot read repos outside $HOME.
+      - uvx --from actionlint-py actionlint
+      - uvx zizmor .github/
 
   doc:
     desc: Build docs including private items, warnings as errors (mermaid diagrams rendered)

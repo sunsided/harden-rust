@@ -49,11 +49,13 @@ Adjust the template to the repo:
   The script (needs an authenticated `gh`) resolves each `owner/repo@ref` through `gh api` and rewrites it in place.
   It turns floating refs such as `@v6` into the most specific matching tag (`# v6.0.1`).
   It prints a note when a newer **major** exists. Read that release's notes, bump the
-  template ref when it is safe, and re-pin. An inline `with: { ... }` mapping on
-  `dtolnay/rust-toolchain` is left alone, with a warning to add `toolchain:` by hand.
-  `dtolnay/rust-toolchain@stable` becomes `@<sha> # stable`. That is fine, because that
-  action reads the toolchain from the branch name. Pinning by SHA keeps it working, but then
-  pass `toolchain: stable` explicitly. The script adds that input for you.
+  template ref when it is safe, and re-pin.
+- **`dtolnay/rust-toolchain` always uses `@master` with an explicit `toolchain:` input**
+  (`stable`, `nightly`, or the MSRV). Its toolchain branches (`@stable`, `@1.85`) break
+  Dependabot once pinned to a SHA, so never pin to them. The script rewrites
+  `@stable` and older `@<sha> # stable` pins to `@<sha> # master` and moves the toolchain
+  into `toolchain:`. An inline `with: { ... }` mapping is left alone, with a warning to add
+  `toolchain:` by hand.
 - Dependabot (`docs/supply-chain.md`) keeps the pinned SHAs current, and updates the comment too.
 - No `pull_request_target` and no `${{ github.event.* }}` interpolation inside `run:`.
   Pass such values through `env:` instead.
@@ -62,8 +64,10 @@ Adjust the template to the repo:
 ## actionlint and zizmor
 
 `actions-lint.yml` runs both on every PR. It has no path filter, so both jobs can be
-required checks. Locally: `task lint:actions`. A snap-installed actionlint cannot read paths
-outside `$HOME`. Use `actionlint -stdin-filename f.yml - < f.yml` per file there.
+required checks. Locally: `task lint:actions`. It runs both through `uvx`
+(`uvx --from actionlint-py actionlint`, `uvx zizmor`), so neither needs an install. Do not
+install actionlint from snap: that build cannot read paths outside `$HOME` and fails with
+`No project was found in any parent directories of "/var/lib/snapd/void"`.
 The zizmor action runs in blocking mode (`advanced-security: false`), so findings fail the
 job. The alternative is SARIF upload to the Security tab: remove the input and add
 `security-events: write`. That mode does not fail the job.
